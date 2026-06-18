@@ -1,13 +1,10 @@
-export default function HomePage() {
-  return (
-    <main className="min-h-screen flex flex-col items-center justify-center">
-      <h1 className="text-5xl font-bold">
-        Operant OS
-      </h1>
+import { app } from "@/lib/firebase";
 
-      <p className="mt-4 text-lg">
-        AI Powered Business Operating System
-      </p>
+export default function TestPage() {
+  return (
+    <main>
+      <h1>Firebase Connected</h1>
+      <p>{app.name}</p>
     </main>
   );
 }
