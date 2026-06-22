@@ -1,5 +1,6 @@
 export interface Business {
   id: string;
-  name: string;
   ownerId: string;
+  name: string;
+  createdAt: string;
 }
