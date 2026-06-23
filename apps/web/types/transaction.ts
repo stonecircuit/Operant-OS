@@ -4,6 +4,7 @@ export interface Transaction {
   type: TransactionType;
   amount: number;
   description: string;
+  category: string;
   createdAt: string;
 }
 
@@ -16,6 +17,7 @@ export interface CreateTransactionInput {
   type: TransactionType;
   amount: number;
   description: string;
+  category: string;
 }
 
 export interface TransactionSummary {
@@ -23,4 +25,24 @@ export interface TransactionSummary {
   totalExpenses: number;
   netBalance: number;
   totalTransactions: number;
+  topIncomeCategory: string | null;
+  topExpenseCategory: string | null;
 }
+
+export const INCOME_CATEGORIES = ["Revenue"] as const;
+
+export const EXPENSE_CATEGORIES = [
+  "Software",
+  "Marketing",
+  "Operations",
+  "Equipment",
+  "Travel",
+  "Tax",
+  "Salary",
+  "Miscellaneous",
+] as const;
+
+export type IncomeCategory = typeof INCOME_CATEGORIES[number];
+export type ExpenseCategory = typeof EXPENSE_CATEGORIES[number];
+export type TransactionCategory = IncomeCategory | ExpenseCategory;
+

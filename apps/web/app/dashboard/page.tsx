@@ -164,6 +164,12 @@ export default function DashboardPage() {
             >
               Transactions
             </Link>
+            <Link
+              href="/reports"
+              className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-900 hover:text-slate-950"
+            >
+              Reports
+            </Link>
             <button
               onClick={handleLogout}
               className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-900 hover:text-slate-950"
@@ -213,7 +219,7 @@ export default function DashboardPage() {
           </section>
         ) : (
           <>
-            <section className="grid gap-4 md:grid-cols-4">
+            <section className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
               <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                 <p className="text-sm font-medium text-slate-500">
                   Total Income
@@ -253,6 +259,24 @@ export default function DashboardPage() {
                 </p>
                 <p className="mt-3 text-2xl font-bold text-slate-950">
                   {summary.totalTransactions}
+                </p>
+              </div>
+
+              <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                <p className="text-sm font-medium text-slate-500">
+                  Top Income Category
+                </p>
+                <p className="mt-3 text-2xl font-bold text-slate-950">
+                  {summary.topIncomeCategory ?? "None"}
+                </p>
+              </div>
+
+              <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                <p className="text-sm font-medium text-slate-500">
+                  Top Expense Category
+                </p>
+                <p className="mt-3 text-2xl font-bold text-slate-950">
+                  {summary.topExpenseCategory ?? "None"}
                 </p>
               </div>
             </section>

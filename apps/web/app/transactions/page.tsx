@@ -16,6 +16,10 @@ import {
   deleteTransaction,
   getTransactions,
 } from "@/services/transactionService";
+import {
+  INCOME_CATEGORIES,
+  EXPENSE_CATEGORIES,
+} from "@/types/transaction";
 import type {
   Transaction,
   TransactionType,
@@ -55,6 +59,8 @@ export default function TransactionsPage() {
     useState<string | null>(null);
   const [type, setType] =
     useState<TransactionType>("income");
+  const [category, setCategory] =
+    useState<string>(INCOME_CATEGORIES[0]);
   const [amount, setAmount] =
     useState("");
   const [description, setDescription] =
@@ -175,6 +181,13 @@ export default function TransactionsPage() {
       return;
     }
 
+    if (!category) {
+      setFormError(
+        "Category is required."
+      );
+      return;
+    }
+
     setSubmitting(true);
     setFormError(null);
     setErrorMessage(null);
@@ -187,6 +200,7 @@ export default function TransactionsPage() {
           amount: parsedAmount,
           description:
             cleanDescription,
+          category,
         });
 
       setTransactions((current) =>
@@ -203,6 +217,7 @@ export default function TransactionsPage() {
       setAmount("");
       setDescription("");
       setType("income");
+      setCategory(INCOME_CATEGORIES[0]);
     } catch (error) {
       console.error(
         "Create Transaction Error:",
@@ -296,6 +311,12 @@ export default function TransactionsPage() {
             >
               Businesses
             </Link>
+            <Link
+              href="/reports"
+              className="rounded-md border border-slate-300 px-4 py-2 text-slate-700 transition hover:border-slate-900 hover:text-slate-950"
+            >
+              Reports
+            </Link>
           </nav>
         </header>
 
@@ -320,19 +341,22 @@ export default function TransactionsPage() {
               onSubmit={handleSubmit}
               className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
             >
-              <div className="grid gap-5 md:grid-cols-[160px_180px_1fr_auto] md:items-end">
+              <div className="grid gap-5 md:grid-cols-[140px_160px_140px_1fr_auto] md:items-end">
                 <label className="flex flex-col gap-2">
                   <span className="text-sm font-semibold text-slate-700">
                     Type
                   </span>
                   <select
                     value={type}
-                    onChange={(event) =>
-                      setType(
-                        event.target
-                          .value as TransactionType
-                      )
-                    }
+                    onChange={(event) => {
+                      const newType = event.target.value as TransactionType;
+                      setType(newType);
+                      setCategory(
+                        newType === "income"
+                          ? INCOME_CATEGORIES[0]
+                          : EXPENSE_CATEGORIES[0]
+                      );
+                    }}
                     className="h-11 rounded-md border border-slate-300 bg-white px-3 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
                   >
                     <option value="income">
@@ -341,6 +365,31 @@ export default function TransactionsPage() {
                     <option value="expense">
                       Expense
                     </option>
+                  </select>
+                </label>
+
+                <label className="flex flex-col gap-2">
+                  <span className="text-sm font-semibold text-slate-700">
+                    Category
+                  </span>
+                  <select
+                    value={category}
+                    onChange={(event) =>
+                      setCategory(event.target.value)
+                    }
+                    className="h-11 rounded-md border border-slate-300 bg-white px-3 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                  >
+                    {type === "income"
+                      ? INCOME_CATEGORIES.map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat}
+                          </option>
+                        ))
+                      : EXPENSE_CATEGORIES.map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat}
+                          </option>
+                        ))}
                   </select>
                 </label>
 
@@ -434,6 +483,9 @@ export default function TransactionsPage() {
                           Type
                         </th>
                         <th className="px-5 py-3 font-semibold">
+                          Category
+                        </th>
+                        <th className="px-5 py-3 font-semibold">
                           Amount
                         </th>
                         <th className="px-5 py-3 font-semibold">
@@ -471,6 +523,9 @@ export default function TransactionsPage() {
                                   ? "Income"
                                   : "Expense"}
                               </span>
+                            </td>
+                            <td className="whitespace-nowrap px-5 py-4 text-slate-700">
+                              {transaction.category}
                             </td>
                             <td className="whitespace-nowrap px-5 py-4 font-semibold text-slate-950">
                               {currencyFormatter.format(

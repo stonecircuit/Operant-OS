@@ -41,12 +41,20 @@ function normalizeTransaction(
     );
   }
 
+  const category =
+    typeof data.category === "string" && data.category.trim()
+      ? data.category.trim()
+      : data.type === "income"
+      ? "Revenue"
+      : "Miscellaneous";
+
   return {
     id,
     businessId: data.businessId,
     type: data.type,
     amount: data.amount,
     description: data.description,
+    category,
     createdAt: data.createdAt,
   };
 }
@@ -57,6 +65,8 @@ export async function createTransaction(
   const amount = Number(input.amount);
   const description =
     input.description.trim();
+  const category =
+    typeof input.category === "string" ? input.category.trim() : "";
 
   if (!input.businessId) {
     throw new Error(
@@ -88,12 +98,19 @@ export async function createTransaction(
     );
   }
 
+  if (!category) {
+    throw new Error(
+      "Category is required."
+    );
+  }
+
   const transactionData =
     {
       businessId: input.businessId,
       type: input.type,
       amount,
       description,
+      category,
       createdAt:
         new Date().toISOString(),
     } satisfies Omit<Transaction, "id">;
