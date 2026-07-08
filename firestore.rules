@@ -1,0 +1,102 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper to get business data
+    function getBusiness(businessId) {
+      return get(/databases/$(database)/documents/businesses/$(businessId)).data;
+    }
+
+    // Helper to check if user is a member of business (either as owner or through members map)
+    function isBusinessMember(businessId) {
+      return isAuthenticated() && (
+        getBusiness(businessId).ownerId == request.auth.uid ||
+        (getBusiness(businessId).members != null && getBusiness(businessId).members[request.auth.uid] != null)
+      );
+    }
+
+    function isBusinessOwner(businessId) {
+      return isAuthenticated() && (
+        getBusiness(businessId).ownerId == request.auth.uid ||
+        (getBusiness(businessId).members != null && getBusiness(businessId).members[request.auth.uid] == 'owner')
+      );
+    }
+
+    function isBusinessAdmin(businessId) {
+      return isAuthenticated() && (
+        getBusiness(businessId).ownerId == request.auth.uid ||
+        (getBusiness(businessId).members != null && (
+          getBusiness(businessId).members[request.auth.uid] == 'owner' ||
+          getBusiness(businessId).members[request.auth.uid] == 'admin'
+        ))
+      );
+    }
+
+    // User profile collection
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Businesses collection
+    match /businesses/{businessId} {
+      allow read: if isAuthenticated() && (
+        resource.data.ownerId == request.auth.uid ||
+        (resource.data.members != null && resource.data.members[request.auth.uid] != null)
+      );
+      allow create: if isAuthenticated() &&
+                      request.resource.data.ownerId == request.auth.uid &&
+                      request.resource.data.members != null &&
+                      request.resource.data.members[request.auth.uid] == 'owner';
+      allow update: if isAuthenticated() && (
+        resource.data.ownerId == request.auth.uid ||
+        (resource.data.members != null && (
+          resource.data.members[request.auth.uid] == 'owner' ||
+          resource.data.members[request.auth.uid] == 'admin'
+        ))
+      ) && request.resource.data.ownerId == resource.data.ownerId;
+      allow delete: if isAuthenticated() && (
+        resource.data.ownerId == request.auth.uid ||
+        (resource.data.members != null && resource.data.members[request.auth.uid] == 'owner')
+      );
+    }
+
+    // Transactions collection
+    match /transactions/{transactionId} {
+      allow read: if isBusinessMember(resource.data.businessId);
+      allow create: if isBusinessMember(request.resource.data.businessId);
+      allow update: if isBusinessMember(resource.data.businessId) &&
+                      isBusinessMember(request.resource.data.businessId) &&
+                      request.resource.data.businessId == resource.data.businessId;
+      allow delete: if isBusinessAdmin(resource.data.businessId);
+    }
+
+    // Audit logs collection
+    match /audit_logs/{logId} {
+      allow create: if isBusinessMember(request.resource.data.businessId) &&
+                      request.resource.data.userId == request.auth.uid;
+      allow read: if isBusinessAdmin(resource.data.businessId);
+      allow update, delete: if false; // immutable logs
+    }
+
+    // Products collection
+    match /products/{productId} {
+      allow read: if isBusinessMember(resource.data.businessId);
+      allow create: if isBusinessMember(request.resource.data.businessId);
+      allow update: if isBusinessMember(resource.data.businessId) &&
+                      isBusinessMember(request.resource.data.businessId) &&
+                      request.resource.data.businessId == resource.data.businessId;
+      allow delete: if isBusinessAdmin(resource.data.businessId);
+    }
+
+    // Inventory history collection
+    match /inventory_history/{historyId} {
+      allow read: if isBusinessMember(resource.data.businessId);
+      allow create: if isBusinessMember(request.resource.data.businessId);
+      allow update, delete: if false; // immutable history logs
+    }
+  }
+}

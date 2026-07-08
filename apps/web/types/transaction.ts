@@ -6,6 +6,8 @@ export interface Transaction {
   description: string;
   category: string;
   createdAt: string;
+  merchant?: string;
+  currency?: string;
 }
 
 export type TransactionType =
@@ -18,6 +20,9 @@ export interface CreateTransactionInput {
   amount: number;
   description: string;
   category: string;
+  createdAt?: string;
+  merchant?: string;
+  currency?: string;
 }
 
 export interface TransactionSummary {

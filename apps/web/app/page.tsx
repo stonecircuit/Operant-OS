@@ -1,10 +1,5 @@
-import { app } from "@/lib/firebase";
+import { redirect } from "next/navigation";
 
-export default function TestPage() {
-  return (
-    <main>
-      <h1>Firebase Connected</h1>
-      <p>{app.name}</p>
-    </main>
-  );
+export default function RootPage() {
+  redirect("/dashboard");
 }

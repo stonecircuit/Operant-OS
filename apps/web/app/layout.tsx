@@ -4,6 +4,9 @@ import "./globals.css";
 
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BusinessProvider } from "@/contexts/BusinessContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import "@/lib/env";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,11 +34,15 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <AuthProvider>
-          <BusinessProvider>
-            {children}
-          </BusinessProvider>
-        </AuthProvider>
+        <ErrorBoundary>
+          <AuthProvider>
+            <BusinessProvider>
+              <NotificationProvider>
+                {children}
+              </NotificationProvider>
+            </BusinessProvider>
+          </AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
