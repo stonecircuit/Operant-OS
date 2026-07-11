@@ -1,11 +1,9 @@
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 
-const apps = getApps();
-
 const adminApp =
-  apps.length > 0
-    ? apps[0]
+  getApps().length > 0
+    ? getApps()[0]
     : initializeApp({
         credential: cert({
           projectId: process.env.FIREBASE_PROJECT_ID!,
